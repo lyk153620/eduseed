@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <title>생활기록부</title>
+  <?!= include("csscode"); ?>
+</head>
+<body>
+  <div class="no-print-page" id="app">
+    <form class="row">
+      <div class="col-auto">
+        <label for="schoolStage">과정</label>
+        <input type="text" class="form-control" id="schoolStage" name="schoolStage" value="고등" readonly>     
+      </div>
+      <div class="col-auto">
+        <label for="schoolyear">학년도</label>
+        <select id="schoolyear" class="form-control" required>
+        </select>
+      </div>
+      <div class="col-auto">
+        <label for="schoolterm">학기</label>
+        <select id="schoolterm" class="form-control">
+          <option>1</option>
+          <option>2</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <label for="studentname">이름</label>
+        <input type="text" class="form-control" id="studentname" name="studentname">     
+      </div>
+      <div class="col-auto">
+        <label for="sID">학번</label>
+        <select id="sID" class="form-control">
+          <option></option>      
+        </select>
+      </div>
+      <div class="col-auto">
+        <label for="startdate">시작일</label>
+        <input type="input" id="startdate" class="form-control" name="startdate" readonly>
+      </div>
+      <div class="col-auto">
+        <label for="lastdate">종료일</label>
+        <input type="input" id="lastdate" class="form-control" name="lastdate" readonly>     
+      </div>
+      <div class="col-auto">
+        <label for="noprinting">보기 눌러 확인 후 인쇄해주세요.</label> <br>      
+        <button type="button" class="hide-on-print btn btn-primary mb-3" onclick="setAllDataforGradeReport()">보기</button>
+        <button type="button" class="hide-on-print btn btn-primary mb-3" onclick="window.print()">인쇄</button>
+      </div>
+   </form>
+   
+  <div id="errorbox"> </div>
+
+  <div id="loading" class="d-flex justify-content-center d-flex align-items-center invisible">
+    <strong>데이터를 불러오는 중입니다... </strong>    
+    <div class="spinner-border ms-auto" style="width: 3rem; height: 3rem;" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<?!= include("template"); ?>
+
+<!-- <div class="sector"> -->
+<h4><strong><center>학교생활평가서</center></strong></h4><br>
+<div style="width: 75%; float: left;"></div>
+
+<div style="width: 200px; height:150px; float: right;">
+  <img class="profilePic" src="https://drive.google.com/uc?export=view&id=1SHSilEqAGP_8AAcAABz0G8_7uHg3y-TT" width="117px"; height="150px" alt="">
+</div><br><br><br><br><br><br><br>
+
+<h6><strong>1. 출결상황</strong></h6>
+<table class="w3-centered w3-small">
+  <thead>
+    <tr>
+      <th rowspan="2">학년</th>
+      <th rowspan="2">수업일수</th>
+      <th colspan="3">결석일수</th>
+      <th colspan="3">지각</th>
+      <th colspan="3">조퇴</th>
+      <th colspan="3">결과</th>
+      <th rowspan="2">특기사항</th>
+    </tr>
+    <tr>
+      <th>질병</th>
+      <th>미인정</th>
+      <th>가정체험</th>
+      <th>질병</th>
+      <th>미인정</th>
+      <th>기타</th>
+      <th>질병</th>
+      <th>미인정</th>
+      <th>기타</th>
+      <th>질병</th>
+      <th>미인정</th>
+      <th>기타</th>
+    </tr>
+  </thead>
+  <tbody id="result2">
+  </tbody>
+</table>
+<!-- 
+<h6><strong>2. 수상경력('수상명', '등급', '수상연월일', '수여기관', '참가대상(참가인원)' 순)</strong></h6>
+<table class="w3 w3-small">
+  <tbody id="result3">
+  </tbody>
+</table>
+
+<h6><strong>3. 창의적 체험활동상황</strong></h6>
+<div id="creativeActivities"> </div>
+
+<table class="w3-centered w3-small">
+  <tbody id="voluntaryWorkResult">
+  </tbody>
+</table>
+
+<h6><strong>4. 교과학습발달상황</strong></h6>
+<div class="achievement_standards">
+  <성취도 기준><br> 
+  A+ : 100~95이상 A : 95미만~90이상 B+ : 90미만~80이상 <br> 
+  B : 80미만~70이상 C+ : 70미만~65이상 C : 65미만~ 55이상 <br> 
+  D : 55미만~
+</div>
+<div id="gradeResults"></div>
+<table class="w3-centered w3-small">
+  <thead>
+    <tr>
+      <th style="width:20%; border-right:0;">과목 / 학기</th>
+      <th style="border-left:0;">교사 의견</th>
+    </tr>
+  </thead>
+  <tbody id="voluntaryWorkResult">
+    <td colspan="2"></td>
+  </tbody>
+</table>
+
+<br>
+<성경∙체육∙악기>
+<table class="w3-centered w3-small">  
+  <thread>
+    <tr>
+      <td style="widtd:20%">과목 (담당교사)</td>
+      <td style="widtd:35%">1학기<br>점수 / 성취도</td>
+      <td style="widtd:35%">2학기<br>점수 / 성취도</td>
+      <td style="widtd:10%">비고</td>
+    </tr>
+  </thread>
+  <tboody>
+    <tr>
+      <td>dddd</td>
+      <td>a</td>
+      <td>a</td>
+      <td>gasd</td>
+    </tr>
+  </tboody>
+</table>
+<br>
+
+<table class="w3-centered w3-small">  
+  <thead>
+    <tr>
+      <th style="width:20%; border-right:0;">과목 / 학기</th>
+      <th style="border-left:0;">교사 의견</th>
+    </tr>
+  </thead>
+  <tbody id="voluntaryWorkResult">
+    <td colspan="2">wdf</td>
+  </tbody>
+</table>
+
+<h6><strong>5. <선택수업></strong></h6>
+<table class="w3-centered w3-small">  
+  <thead>
+    <tr>
+      <th style="width:20%; border-right:0;">과목 / 학기</th>
+      <th style="border-left:0;">교사 의견</th>
+    </tr>
+  </thead>
+  <tbody id="voluntaryWorkResult">
+    <td colspan="2">wdf</td>
+  </tbody>
+</table>
+
+<br>
+<h6><strong>6. 행동특성 및 종합의견</strong></h6>
+<table class="w3-centered w3-small">
+  <thead>
+    <tr>
+      <th style="width:10%;">학년</th>
+      <th style="width:10%;">학기</th>
+      <th>행동특성 및 종합의견</th>
+    </tr>
+  </thead>
+  <tbody id="hrOpinionResult">
+  </tbody>
+</table>
+<br>
+<br>
+
+<h2><strong><center>밀 알 두 레 학 교 장</center></strong></h2>
+<br> -->
+</body>
+<?!= include("jscode"); ?>
+</html>

@@ -1,0 +1,87 @@
+<style>
+    @page a4sheet {
+      size: 21.0cm 29.7cm 
+    }
+    .a4 {
+      page: a4sheet; 
+      page-break-after: always
+    }
+    
+    #loading {
+      position: fixed;
+      top:0;
+      left:0;
+      z-index: 10000;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(255,255,255,0.9);  
+    }
+      
+    @media print {
+      .page-divide {
+        page-break-after: always;
+      }
+      .no-print-page {
+        display: none; //작업의 편리함을 위해 넣은 페이지 구분선. 프린트 시에는 보이지 않음
+      }
+    
+      @page {
+        margin: 20px;
+      }
+    
+      /* 내용 영역을 페이지 전체에 맞춤 */
+      .content {
+        margin: 20px;
+        padding: 20px;
+        width: 100%;
+      }
+    }
+    
+    #pageFooter {
+      display: table-footer-group;
+      text-align: center;
+    }
+    
+    #pageFooter:after {
+      counter-increment: page;
+      content: "페이지 " counter(page) " / " counter(pages);
+      white-space: nowrap;
+    }
+    
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 5px;
+    }
+    
+    th {
+      background-color: #f2f2f2;
+    }
+    
+    #content {
+      display: table;
+    }
+    
+    #pageFooter {
+      display: table-footer-group;
+    }
+    #pageFooter:after {
+      counter-increment: page;
+      content:"Page " counter(page);
+      left: 0;
+      top: 100%;
+      white-space: nowrap;
+      z-index: 20px;
+      -moz-border-radius: 5px;
+      -moz-box-shadow: 0px 0px 4px #222;
+      background-image: -moz-linear-gradient(top, #eeeeee, #cccccc);
+      background-image: -moz-linear-gradient(top, #eeeeee, #cccccc);
+    }
+    
+    </style>

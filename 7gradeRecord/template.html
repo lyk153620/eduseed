@@ -1,0 +1,149 @@
+<template id="forResult2">
+    <tr>
+      <td class="attendance1"></td>
+      <td class="attendance2"></td>
+      <td class="attendance3"></td>
+      <td class="attendance4"></td>
+      <td class="attendance5"></td>
+      <td class="attendance6"></td>
+      <td class="attendance7"></td>
+      <td class="attendance8"></td>
+      <td class="attendance9"></td>
+      <td class="attendance10"></td>
+      <td class="attendance11"></td>
+      <td class="attendance12"></td>
+      <td class="attendance13"></td>
+      <td class="attendance14"></td>
+      <td class="attendance15"></td>
+    </tr>
+  </template>
+  
+  <template id="forResult3">
+    <tr>
+      <td class="award1">dd</td>
+    </tr>
+  </template>
+  
+  <template id="forCreativeActivities">
+    <table class="w3-centered w3-small activityTable">
+      <thead>
+        <tr>
+          <th style="width:5%;" rowspan="2">학년</th>
+          <th colspan="4">창의적 체험활동 상황</th>
+        </tr>
+        <tr>
+          <th style="width:10%;">영역</th>
+          <th style="width:5%;">시간</th><th colspan="2" style="width:60%">특기사항</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th rowspan="4"><span class="activityYear"></span></th>
+          <td>자율활동</td>
+          <td><span class="voluntaryActivityHours"></span></td>
+          <td class="w3-left-align" align="left" colspan="2"><span class="voluntaryActivityContent"></span></td>
+        </tr>
+        <tr>
+          <td>동아리활동</td>
+          <td><span class="clubHours"></span></td>
+          <td class="w3-left-align" align="left" colspan="2"><span class="clubContent"></span></td>
+        </tr>
+        <tr>
+          <td rowspan="2">진로활동</td>
+          <td rowspan="2"><span class="careerHours"></span></td>
+          <td style="width: 15%;">희망분야</td>
+          <td align="left"><span class="careerField"></span></td>
+        </tr>
+        <tr>
+          <td class="w3-left-align" align="left" colspan="2"><span class="careerContent"></span></td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+  </template>
+  
+  <template id="gradeResultTemplate">
+    <span class="thisStudentYear"></span>
+    <table class="w3-centered w3-small">
+      <thead>
+        <tr>
+          <th style="width:10%;">학기</th>
+          <th style="width:15%;">교과</th>
+          <th style="width:45%;">과목</th>
+          <th style="width:10%;">원점수</th>
+          <th style="width:10%;">과목평균</th>
+          <th style="width:10%;">비고</th>
+        </tr>
+      </thead>
+      <tbody id="gradeInside">
+      </tbody>
+    </table>
+    <br>
+  
+    <table class="w3-centered w3-small">
+      <thead>
+        <tr>
+          <th class="w3-left-align"> &emsp;&emsp; 과목 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; 세부능력 및 특기사항</th>
+        </tr>
+      </thead>
+      <tbody id="gradeComments">
+      </tbody>
+    </table>
+    <br>
+  </template>
+  
+  <template id="insideGrade">
+    <tr>
+      <td class="fieldGrade1"></td>
+      <td class="fieldGrade2"></td>
+      <td class="fieldGrade3"></td>
+      <td class="fieldGrade4"></td>
+      <td class="fieldGrade5"></td>
+      <td class="fieldGrade6"></td>
+    </tr>
+  </template>
+  
+  <template id="commentsTemplate">
+    <tr>
+      <td class="subjectOpinions w3-left-align"></td>
+    </tr>
+  </template>
+  
+  <template id="readingTemplate">
+    <tr>
+      <th class="yearReading"></th>
+      <td class="readingField"></td>
+      <td class="readingRecordContents w3-left-align"></td>
+    </tr>
+  </template>
+  
+  <template id="voluntaryWorkTemplate">
+    <tr>
+      <td class="voluntaryWork1 width:30%;"></td>
+      <td class="voluntaryWork2 w3-left-align"></td>
+    </tr>
+  </template>
+  
+  <template id="forHrOpResult">
+    <tr>
+      <td class="hrOpinionYear"></td>
+      <td class="hrOpinion w3-left-align"></td>
+    </tr>
+  </template>
+  
+  <template id="sIDTemplate">
+    <option class="sIDs">&nbsp;</option>
+  </template>
+  
+  <template id="rowTemplate">
+    <option class="insertOption">&nbsp;</option>
+  </template>
+  
+  <template id="emptyOption">
+    <option>&nbsp;</option>
+  </template>
+  
+  <template id="errormessage">
+    <div class="alert alert-success mt-3" role="alert" id="getFocus" tabindex>에러가 발생했습니다. 3초 후에 다시 시도해 주세요. 그래도 반복되면 관리자에게 문의해 주세요.</div>
+  </template>
+  

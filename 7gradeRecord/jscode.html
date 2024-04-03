@@ -1,0 +1,890 @@
+<script>
+    var initialBasicData;
+    var registrationData; 
+    var basicData; 
+    var attendanceData; 
+    var awardData; 
+    var voluntaryActivityData; 
+    var careerOrientedData; 
+    var clubData; 
+    var voluntaryWorkData; 
+    var subjectData; 
+    var gradeData; 
+    var readingData; 
+    var opinionData;
+    var schoolPeriodData;
+  
+    var middleSchool = ["6","7","8","9"];
+    var highSchool = ["10","11","12"];
+  
+  //1번 (기본정보에서 학번 정보만 가져온다)
+    function setInitialBasicData(){
+      loadingStart();
+      google.script.run.withSuccessHandler(function(dataReturned){
+        initialBasicData = dataReturned.slice();
+        loadingEnd();       
+      }).getInitialBasicData();    
+    }
+    
+  //1번: 재적 정보와 학기 날짜 정보 가져오기
+      function setRegistrationData(){
+          loadingStart();    
+        setSubjectDataForSearch();    
+        google.script.run.withFailureHandler(function(){
+         loadingEnd();
+      var errorMessageBox = document.getElementById("errorbox");
+      var templateBox = document.getElementById("errormessage");
+      var template = templateBox.content;                
+       var mg = template.cloneNode(true);
+       errorMessageBox.appendChild(mg);
+       document.getElementById("getFocus").focus();
+       setTimeout(function(){
+        errorMessageBox.innerHTML = "";
+        },3000)})
+        .withSuccessHandler(function(dataReturned){
+         registrationData = dataReturned[0].slice();    //이게 전체 지정할 때는 var를 넣으면 안되는 구나. var registrationData = 이런식으로 하면 안됨.
+         schoolPeriodData = dataReturned[1].slice();
+        //  console.log(registrationData);
+        //  console.log(schoolPeriodData);
+         for(i=0;i<4;i++){
+           if(registrationData !== undefined){
+         setSchoolYearDropdown();
+         break;
+         } else if (i==3) {
+      var errorMessageBox = document.getElementById("errorbox");
+      var templateBox = document.getElementById("errormessage");
+      var template = templateBox.content;                
+       var mg = template.cloneNode(true);
+       errorMessageBox.appendChild(mg);
+       document.getElementById("getFocus").focus();
+       setTimeout(function(){
+        errorMessageBox.innerHTML = "";
+        },3000);
+        break;   
+        } else if(registrationData === undefined){
+                  Utilities.sleep(500);
+         }
+      }
+        setDate();
+        loadingEnd();       
+        }).getRegistrationData();    
+        }
+    
+  
+  //2번
+  function setSchoolYearDropdown(){
+    
+      var yearData = registrationData.map(r => r[1].toString()).sort().reverse();
+      var uniqueYearData = [...new Set(yearData)];
+      var schoolYearBox = document.getElementById("schoolyear");
+      var templateBox = document.getElementById("rowTemplate");
+      var template = templateBox.content;
+          
+        uniqueYearData.forEach(function(r){
+          
+       var tr = template.cloneNode(true);
+       var copyOption = tr.querySelector(".insertOption"); 
+       
+       copyOption.textContent = r;
+       schoolYearBox.appendChild(tr);
+    });
+  }
+  
+  //3번
+  function setDate(){
+      var schoolYear = document.getElementById("schoolyear").value.toString();
+      var schoolTerm = document.getElementById("schoolterm").value.toString();
+  
+      var currentPeriod = schoolPeriodData.filter(function(r){
+          return r[0].toString() === schoolYear && r[1].toString() === schoolTerm;
+      });  
+         document.getElementById("startdate").value = currentPeriod[0][2];   
+         document.getElementById("lastdate").value = currentPeriod[0][3];   
+  
+  }
+  
+  //2번 (사용자로부터 입력받은 학생 이름을 기반으로 해당 이름에 매칭되는 학생 ID들을 검색하고, 이를 웹 페이지에 동적으로 표시합니다.)
+    function searchsIDs(){
+      
+      var nameInput = document.getElementById("studentname").value.toString().toLowerCase();
+      
+      var sIDList = nameInput === "" ? [] : initialBasicData.filter(function(r){
+        
+        return r[1] === nameInput;
+      
+      });
+  
+      var idResultsBox = document.getElementById("sID");
+      var templateBox = document.getElementById("sIDTemplate");
+      var template = templateBox.content;
+      idResultsBox.innerHTML = "<option> </option>";
+    
+      sIDList.forEach(function(r){  
+       var tr = template.cloneNode(true);
+       var idColumn = tr.querySelector(".sIDs"); 
+       idColumn.textContent = r[0];   
+       idResultsBox.appendChild(tr);        
+      });
+    }
+  
+    //3번 이제 학번이 바뀌면 그 학번을 기준으로 필요한 모든 데이터를 가져와 보자. 데이터 가져오는 거랑, 화면에 보이게 하는 것을 나눠서 해보자.
+    function setAllData(){
+      try{
+        var sID = document.getElementById("sID").value;
+        if (sID !== ""){
+          loadingStart();
+          var schoolStage = document.getElementById("schoolStage").value;
+          google.script.run.withFailureHandler(function(){
+            loadingEnd();
+            var errorMessageBox = document.getElementById("errorbox");
+            var templateBox = document.getElementById("errormessage");
+            var template = templateBox.content;                
+            var mg = template.cloneNode(true);
+            errorMessageBox.appendChild(mg);
+            document.getElementById("getFocus").focus();
+            
+            setTimeout(function(){
+              errorMessageBox.innerHTML = "";
+            },3000);
+  
+          }).withSuccessHandler(function(dataReturned){
+            registrationData = dataReturned[0].slice(); 
+            basicData = dataReturned[1].slice(); 
+            attendanceData = dataReturned[2].slice(); 
+            awardData = dataReturned[3].slice(); 
+            voluntaryActivityData = dataReturned[4].slice(); 
+            careerOrientedData = dataReturned[5].slice(); 
+            clubData = dataReturned[6].slice(); 
+            voluntaryWorkData = dataReturned[7].slice(); 
+            subjectData = dataReturned[8].slice(); 
+            gradeData = dataReturned[9].slice(); 
+            readingData = dataReturned[10].slice(); 
+            opinionData = dataReturned[11].slice();
+            schoolPeriodData = dataReturned[12].slice();
+            // console.log(gradeData);
+            loadingEnd();
+          }).setAllData(sID, schoolStage);
+        }
+      } catch (error) {
+        loadingEnd();
+        var errorMessageBox = document.getElementById("errorbox");
+        var templateBox = document.getElementById("errormessage");
+        var template = templateBox.content;                
+        var mg = template.cloneNode(true);
+        errorMessageBox.appendChild(mg);
+        document.getElementById("getFocus").focus();
+        
+        setTimeout(function(){
+        errorMessageBox.innerHTML = "";
+        },3000);
+      } 
+    }
+  
+  //4번. 보기 누르면 모든 정보가 생기부에 들어가게 하기
+    function displayAllDataforLifeRecord(){
+      displayRegistrationData();
+      displayBasicData();
+      displayAttendanceData();
+      // displayAward();
+      // displayCreativeActivities();
+      // displayGrade();
+      // displayReadingRecord();
+      // displayHrOpinions();
+      // displayVoluntaryWork();
+      // changeProfilePicture();
+    }
+  
+  // 4-1 재적정보 가져온 것 넣기
+    function displayRegistrationData(){
+      var searchResultsBox = document.getElementById("result1");
+      var templateBox = document.getElementById("forResult1");
+      var template = templateBox.content;
+      var sortedRegistrationData = registrationData.sort(function(a, b){
+        var x = a[1];
+        var y = b[1];
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+        return 0;
+      });
+      console.log(sortedRegistrationData);
+      if (registrationData.length !== 0) {
+        searchResultsBox.innerHTML = "";    
+      }  
+      sortedRegistrationData.forEach(function(r){       
+        var tr = template.cloneNode(true);
+        var studentYearColumn = tr.querySelector(".studentYear"); 
+        var studentClassColumn = tr.querySelector(".studentClass"); 
+        var studentNumberColumn = tr.querySelector(".studentNumber"); 
+        var homeroomTeacherColumn = tr.querySelector(".homeroomTeacher");
+  
+        studentYearColumn.textContent = r[5];
+        studentClassColumn.textContent = r[6];
+        studentNumberColumn.textContent = r[7];
+        homeroomTeacherColumn.textContent = r[8];
+        searchResultsBox.appendChild(tr);
+      });
+    }
+  
+  //4-2 기본정보 가져온 것 넣기
+    function displayBasicData(){
+  
+      var schoolStage = document.getElementById("schoolStage").value;
+  
+      // console.log(basicData);
+      document.getElementById("basic_1").textContent = basicData[0][1];
+      document.getElementById("basic_2").textContent = basicData[0][2];
+      document.getElementById("basic_0").textContent = basicData[0][0];
+      document.getElementById("basic_3").textContent = basicData[0][3];
+      document.getElementById("basic_18").textContent = basicData[0][18];
+      document.getElementById("basic_4").innerText = basicData[0][4];
+      document.getElementById("basic_5").innerText = basicData[0][5];
+      
+      if(schoolStage === "중등"){
+        document.getElementById("basic_8").innerText = basicData[0][7];
+      } else if(schoolStage === "고등"){
+        document.getElementById("basic_8").innerText = basicData[0][8];
+      }
+    }
+  
+  //4-3 출석정보 보이기
+    function displayAttendanceData(){
+  
+      var searchResultsBox = document.getElementById("result2");
+      var templateBox = document.getElementById("forResult2");
+      var template = templateBox.content;
+      searchResultsBox.innerHTML = "";    
+  
+      var sortedRegistrationData = registrationData.sort(function(a, b){
+        var x = a[1];
+        var y = b[1];
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+        return 0;
+      });
+    
+      for(i=0; i<registrationData.length; i++){
+  
+        var attendanceSchoolYear = sortedRegistrationData[i][1];
+        var yearData = schoolPeriodData.filter(function(r){ 
+          return r[0] === attendanceSchoolYear 
+        }).sort(function(a, b){
+          var x = a[1];
+          var y = b[1];
+          if (x < y) {return -1;}
+          if (x > y) {return 1;}
+          return 0;
+        });
+        var yearStart = yearData[0][2];                                                      
+        var yearEnd = yearData[1][3];                                                      
+  
+        var attendance = attendanceData.filter(function(r){
+          return r[1] >= yearStart && r[1] <= yearEnd;
+        });     
+  
+        var tr = template.cloneNode(true);
+        var attendance1Column = tr.querySelector(".attendance1"); 
+        var attendance2Column = tr.querySelector(".attendance2"); 
+        var attendance3Column = tr.querySelector(".attendance3"); 
+        var attendance4Column = tr.querySelector(".attendance4"); 
+        var attendance5Column = tr.querySelector(".attendance5"); 
+        var attendance6Column = tr.querySelector(".attendance6"); 
+        var attendance7Column = tr.querySelector(".attendance7"); 
+        var attendance8Column = tr.querySelector(".attendance8"); 
+        var attendance9Column = tr.querySelector(".attendance9"); 
+        var attendance10Column = tr.querySelector(".attendance10"); 
+        var attendance11Column = tr.querySelector(".attendance11"); 
+        var attendance12Column = tr.querySelector(".attendance12"); 
+        var attendance13Column = tr.querySelector(".attendance13"); 
+        var attendance14Column = tr.querySelector(".attendance14"); 
+        var attendance15Column = tr.querySelector(".attendance15"); 
+  
+  
+        var attendedDays = attendance.filter(function(r){
+          return r[2] !== "질결" && r[2] !== "무결" && r[2] !== "기결"
+        }).length;
+  
+        attendance1Column.textContent = sortedRegistrationData[i][5]; 
+        attendance2Column.textContent = attendedDays; 
+        attendance3Column.textContent = attendance.filter(function(r){ return r[2] === "질결"}).length;
+        attendance4Column.textContent = attendance.filter(function(r){ return r[2] === "무결"}).length;
+        attendance5Column.textContent = attendance.filter(function(r){ return r[2] === "기결"}).length;
+        attendance6Column.textContent = attendance.filter(function(r){ return r[2] === "질지"}).length;
+        attendance7Column.textContent = attendance.filter(function(r){ return r[2] === "무지"}).length;
+        attendance8Column.textContent = attendance.filter(function(r){ return r[2] === "기지"}).length;
+        attendance9Column.textContent = attendance.filter(function(r){ return r[2] === "질조"}).length;
+        attendance10Column.textContent = attendance.filter(function(r){ return r[2] === "무조"}).length;
+        attendance11Column.textContent = attendance.filter(function(r){ return r[2] === "기조"}).length;
+        attendance12Column.textContent = attendance.filter(function(r){ return r[2] === "질결과"}).length;
+        attendance13Column.textContent = attendance.filter(function(r){ return r[2] === "무결과"}).length;
+        attendance14Column.textContent = attendance.filter(function(r){ return r[2] === "기결과"}).length;
+        searchResultsBox.appendChild(tr);
+      }
+    }
+  
+   
+  //반복문 쓰기 전 버전 (교육용)
+  // var firstSchoolYear = sortedRegistrationData[0][1];
+  // var secondSchoolYear = sortedRegistrationData[1][1];
+  // var thirdSchoolYear = sortedRegistrationData[2][1];
+  // var fourthSchoolYear = sortedRegistrationData[3][1];
+  
+  // var firstYearData = schoolPeriodData.filter(function(r){ return r[0] === firstSchoolYear }).sort(function(a, b){
+  //                                                         var x = a[1];
+  //                                                         var y = b[1];
+  //                                                         if (x < y) {return -1;}
+  //                                                         if (x > y) {return 1;}
+  //                                                         return 0;
+  //                                                       });
+  // var firstYearStart = firstYearData[0][2];                                                      
+  // var firstYearEnd = firstYearData[1][3];                                                      
+  
+  // var secondYearData = schoolPeriodData.filter(function(r){ return r[0] === secondSchoolYear }).sort(function(a, b){
+  //                                                         var x = a[1];
+  //                                                         var y = b[1];
+  //                                                         if (x < y) {return -1;}
+  //                                                         if (x > y) {return 1;}
+  //                                                         return 0;
+  //                                                       });
+  // var secondYearStart = secondYearData[0][2];                                                      
+  // var secondYearEnd = secondYearData[1][3];                                                      
+  
+  // var thirdYearData = schoolPeriodData.filter(function(r){ return r[0] === thirdSchoolYear }).sort(function(a, b){
+  //                                                         var x = a[1];
+  //                                                         var y = b[1];
+  //                                                         if (x < y) {return -1;}
+  //                                                         if (x > y) {return 1;}
+  //                                                         return 0;
+  //                                                       });
+  // var thirdYearStart = firstYearData[0][2];                                                      
+  // var thirdYearEnd = firstYearData[1][3];                                                      
+  
+  // var fourthYearData = schoolPeriodData.filter(function(r){ return r[0] === fourthSchoolYear }).sort(function(a, b){
+  //                                                         var x = a[1];
+  //                                                         var y = b[1];
+  //                                                         if (x < y) {return -1;}
+  //                                                         if (x > y) {return 1;}
+  //                                                         return 0;
+  //                                                       });
+  // var fourthYearStart = fourthYearData[0][2];                                                      
+  // var fourthYearEnd = fourthYearData[1][3];                                                      
+  
+  
+  // var firstAttendance = attendanceData.filter(function(r){ return r[1] >= firstYearStart && r[1] <= firstYearEnd; });     
+  // var secondAttendance = attendanceData.filter(function(r){ return r[1] >= secondYearStart && r[1] <= secondYearEnd; });     
+  // var thirdAttendance = attendanceData.filter(function(r){ return r[1] >= thirdYearStart && r[1] <= thirdYearEnd; });     
+  // var fourthAttendance = attendanceData.filter(function(r){ return r[1] >= fourthYearStart && r[1] <= fourthYearEnd; });     
+  
+  
+  
+                  
+  //      var tr = template.cloneNode(true);
+  //      var attendance1Column = tr.querySelector(".attendance1"); 
+  //      var attendance2Column = tr.querySelector(".attendance2"); 
+  //      var attendance3Column = tr.querySelector(".attendance3"); 
+  //      var attendance4Column = tr.querySelector(".attendance4"); 
+  //      var attendance5Column = tr.querySelector(".attendance5"); 
+  //      var attendance6Column = tr.querySelector(".attendance6"); 
+  //      var attendance7Column = tr.querySelector(".attendance7"); 
+  //      var attendance8Column = tr.querySelector(".attendance8"); 
+  //      var attendance9Column = tr.querySelector(".attendance9"); 
+  //      var attendance10Column = tr.querySelector(".attendance10"); 
+  //      var attendance11Column = tr.querySelector(".attendance11"); 
+  //      var attendance12Column = tr.querySelector(".attendance12"); 
+  //      var attendance13Column = tr.querySelector(".attendance13"); 
+  //      var attendance14Column = tr.querySelector(".attendance14"); 
+  //      var attendance15Column = tr.querySelector(".attendance15"); 
+  
+  
+  //       var attendedDays = firstAttendance.filter(function(r){ return r[2] !== "질결" && r[2] !== "무결" && r[2] !== "기결"}).length;
+  
+  //      attendance1Column.textContent = firstAttendance.length; 
+  //      attendance2Column.textContent = attendedDays; 
+  //      attendance3Column.textContent = firstAttendance.filter(function(r){ return r[2] === "질결"}).length;  // 이렇게 반복...
+  //      attendance4Column.textContent = r[4"); 
+  //      attendance5Column.textContent = r[5"); 
+  //      attendance6Column.textContent = r[6"); 
+  //      attendance7Column.textContent = r[7"); 
+  //      attendance8Column.textContent = r[8"); 
+  //      attendance9Column.textContent = r[9"); 
+  //      attendance10Column.textContent = r[10"); 
+  //      attendance11Column.textContent = r[11"); 
+  //      attendance12Column.textContent = r[12"); 
+  //      attendance13Column.textContent = r[13"); 
+  //      attendance14Column.textContent = r[14"); 
+  //      attendance15Column.textContent = r[15"); 
+  //      searchResultsBox.appendChild(tr);
+  
+  //좋아.. for문을 써서 자동으로 돌리는 것 만들어 보자.
+  
+  
+  //4-4 수상경력 기록
+  //수상기록
+    function displayAward(){
+      var sortedAwardData = awardData.filter(function(r){
+        return r[10] !== ""
+      }).sort(function(a, b){
+        var x = a[7];
+        var y = b[7];
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+          return 0;
+      });
+  
+      var searchResultsBox = document.getElementById("result3");
+      var templateBox = document.getElementById("forResult3");
+      var template = templateBox.content;
+      
+      if (awardData.length !== 0) {
+        searchResultsBox.innerHTML = "";
+              
+        sortedAwardData.forEach(function(r){        
+          var tr = template.cloneNode(true);
+          var award1Column = tr.querySelector(".award1"); 
+          var award2Column = tr.querySelector(".award2"); 
+          var award3Column = tr.querySelector(".award3"); 
+          var award4Column = tr.querySelector(".award4");
+          var award5Column = tr.querySelector(".award5");
+          var award6Column = tr.querySelector(".award6");
+          var award7Column = tr.querySelector(".award7");
+  
+          award1Column.textContent = r[2];
+          var termNumber = schoolPeriodData.filter(function(el){
+            return el[2] <= r[7] && el[3] >= r[7];
+          });
+          
+          award2Column.textContent = termNumber[0][1];
+          award3Column.textContent = r[5];
+          award4Column.textContent = r[6];
+          award5Column.textContent = r[7];
+          award6Column.textContent = r[8];
+          award7Column.textContent = r[9];
+          searchResultsBox.appendChild(tr);
+        });
+      } else {
+        searchResultsBox.innerHTML = "";    
+        var tr = template.cloneNode(true);
+        searchResultsBox.appendChild(tr);
+      } 
+    }
+  
+    //4-5 창의적 체험활동 전체
+    function displayCreativeActivities(){
+      var sortedRegistrationData = registrationData.sort(function(a, b){
+        var x = a[1];
+        var y = b[1];
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+        return 0;
+      });
+  
+      var searchResultsBox = document.getElementById("creativeActivities");
+      var templateBox = document.getElementById("forCreativeActivities");
+      var template = templateBox.content;
+  
+      if (registrationData.length !== 0) {
+        searchResultsBox.innerHTML = "";
+  
+        for(i=0; i<registrationData.length; i++){
+  
+          var activitySchoolYear = sortedRegistrationData[i][1];
+  
+          var thisVoluntaryActivity = voluntaryActivityData.filter(function(r){
+            return r[0] === activitySchoolYear; 
+          }).sort(function(a, b){
+            var x = a[6];
+            var y = b[6];
+            if (x < y) {return -1;}
+            if (x > y) {return 1;}
+            return 0;
+          });
+  
+          // console.log(thisVoluntaryActivity);
+          if(!thisVoluntaryActivity.length){ 
+            var voluntaryHours = ""; var voluntaryDataAll = ""
+          } else {      
+            var voluntaryHours = thisVoluntaryActivity.map(r => +r[5]) === "" ? "" : thisVoluntaryActivity.map(r => +r[5]).reduce((a, b) => (a + b));
+            var voluntaryDataAll = "";            
+            thisVoluntaryActivity.forEach(function(r){
+              voluntaryDataAll += r[7] + "<br>";
+            });
+          }
+  
+          var thisClubActivity = clubData.filter(function(r){
+            return r[1] === activitySchoolYear;
+          });
+          console.log(thisClubActivity);
+          if(!thisClubActivity.length){
+            var clubHours = ""; var clubDataAll = "";
+          } else {
+            var clubHours =  thisClubActivity.map(r => +r[9]) === "" ? "" :  thisClubActivity.map(r => +r[9]).reduce((a, b) => (a + b));
+            var clubDataAll = "";            
+            thisClubActivity.forEach(function(r){
+              clubDataAll += "(" + r[7] + ")(" + r[9] +"시간) " + r[8] + "<br>";
+            });
+          }
+  
+          console.log(careerOrientedData);
+          var thisCareerOriented = careerOrientedData.filter(function(r){ 
+            return r[0] === activitySchoolYear;
+          }).sort(function(a, b){
+            var x = a[6];
+            var y = b[6];
+            if (x < y) {return -1;}
+            if (x > y) {return 1;}
+            return 0;
+          });
+          console.log(thisCareerOriented);
+          if(!thisCareerOriented.length){
+            var careerOrientedHours = ""; 
+            var careerOrientedDataAll = ""
+          } else {
+            var careerOrientedHours = thisCareerOriented.map(r => +r[5]) === "" ? "" : thisCareerOriented.map(r => +r[5]).reduce((a, b) => (a + b));
+            var careerOrientedDataAll = "";            
+            thisCareerOriented.forEach(function(r){
+              careerOrientedDataAll += r[7] + "<br>";
+            });
+          }
+  
+          var tr = template.cloneNode(true);
+          var activityYearColumn = tr.querySelector(".activityYear");
+          var voluntaryActivityHoursColumn = tr.querySelector(".voluntaryActivityHours");
+          var voluntaryColumn = tr.querySelector(".voluntaryActivityContent");
+          var clubHoursColumn = tr.querySelector(".clubHours");
+          var clubContentColumn = tr.querySelector(".clubContent");
+          var careerHoursColumn = tr.querySelector(".careerHours");
+          var careerFieldColumn = tr.querySelector(".careerField");
+          var careerContentColumn = tr.querySelector(".careerContent");
+  
+          activityYearColumn.innerText = sortedRegistrationData[i][5];//학생학년
+          voluntaryActivityHoursColumn.innerText = voluntaryHours;
+          voluntaryColumn.innerHTML = voluntaryDataAll;
+          clubHoursColumn.innerText = clubHours;
+          clubContentColumn.innerHTML = clubDataAll;
+          careerHoursColumn.innerText = careerOrientedHours;
+          careerFieldColumn.innerText = sortedRegistrationData[i][11]; //희망분야
+          careerContentColumn.innerHTML = careerOrientedDataAll;
+          searchResultsBox.appendChild(tr);
+        }   
+      } 
+    }
+  
+    //4-6 교과학습 발달사항
+    function displayGrade(){
+      var sortedRegistrationData = registrationData.sort(function(a, b){
+        var x = a[1];
+        var y = b[1];
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+        return 0;
+      });
+  
+      var searchResultsBox = document.getElementById("gradeResults");
+      var templateBox = document.getElementById("gradeResultTemplate");
+      var template = templateBox.content;
+  
+      if (registrationData.length !== 0) {
+        searchResultsBox.innerHTML = "";
+  
+        for(i=0; i<registrationData.length; i++){
+          var tr = template.cloneNode(true);
+          var activitySchoolYear = sortedRegistrationData[i][1];
+          // console.log(activitySchoolYear)
+          // console.log(sortedRegistrationData[i][5])
+          var thisStudentYearColumn = tr.querySelector(".thisStudentYear");
+          thisStudentYearColumn.textContent = "[" + sortedRegistrationData[i][5] + "학년]";
+          
+          var firstGradeData = gradeData.filter(function(r){ 
+            return r[0].indexOf(activitySchoolYear+"1") !== -1; 
+          }).sort(function(a, b){
+            var x = a[12];
+            var y = b[12];
+            if (x < y) {return -1;}
+            if (x > y) {return 1;}
+            return 0;
+          });
+          // console.log(firstGradeData);
+  
+          var secondGradeData = gradeData.filter(function(r){
+            return r[0].indexOf(activitySchoolYear+"2") !== -1;
+          }).sort(function(a, b){
+            var x = a[12];
+            var y = b[12];
+            if (x < y) {return -1;}
+            if (x > y) {return 1;}
+            return 0;
+          });
+  
+          var totalGradeData = gradeData.filter(function(r){
+            return r[0].indexOf(activitySchoolYear+r[10]) !== -1;
+          }).sort(function(a, b){
+            var x = a[11];
+            var y = b[11];
+            if (x < y) {return -1;}
+            if (x > y) {return 1;}
+            return 0;
+          }); 
+  
+          var insideResultsBox = tr.getElementById("gradeInside");
+          var insideTemplateBox = document.getElementById("insideGrade");
+          var insideTemplate = insideTemplateBox.content;
+  
+          var commentsResultsBox = tr.getElementById("gradeComments");
+          var commentsTemplateBox = document.getElementById("commentsTemplate");
+          var commentsTemplate = commentsTemplateBox.content;
+  
+          if(totalGradeData.length){ 
+  
+            totalGradeData.forEach(function(r){
+              var tr3 = commentsTemplate.cloneNode(true);
+              var subjectOpinionsColumn = tr3.querySelector(".subjectOpinions");
+              subjectOpinionsColumn.innerHTML = "(" + r[10] + "학기)" + "<b>" + r[11] + "</b>" + " : " + r[5] + "<br>";
+              commentsResultsBox.appendChild(tr3);
+            });
+          }
+  
+          if(firstGradeData.length){ 
+  
+            firstGradeData.forEach(function(r){
+  
+              var tr2 = insideTemplate.cloneNode(true);
+              var fieldGrade1Column = tr2.querySelector(".fieldGrade1");
+              var fieldGrade2Column = tr2.querySelector(".fieldGrade2");
+              var fieldGrade3Column = tr2.querySelector(".fieldGrade3");
+              var fieldGrade4Column = tr2.querySelector(".fieldGrade4");
+              var fieldGrade5Column = tr2.querySelector(".fieldGrade5");
+              var fieldGrade6Column = tr2.querySelector(".fieldGrade6");
+  
+              //  console.log(r[10]);
+  
+              fieldGrade1Column.textContent = r[10];
+              fieldGrade2Column.innerText = r[12];
+              fieldGrade3Column.innerText = r[11];
+              fieldGrade4Column.innerText = r[6];
+              fieldGrade5Column.innerText = r[9].toFixed(1);
+              insideResultsBox.appendChild(tr2);
+  
+            });
+          }
+  
+          if(secondGradeData.length){ 
+  
+            secondGradeData.forEach(function(r){
+  
+              var tr2 = insideTemplate.cloneNode(true);
+              var fieldGrade1Column = tr2.querySelector(".fieldGrade1");
+              var fieldGrade2Column = tr2.querySelector(".fieldGrade2");
+              var fieldGrade3Column = tr2.querySelector(".fieldGrade3");
+              var fieldGrade4Column = tr2.querySelector(".fieldGrade4");
+              var fieldGrade5Column = tr2.querySelector(".fieldGrade5");
+              var fieldGrade6Column = tr2.querySelector(".fieldGrade6");
+  
+              fieldGrade1Column.innerText = r[10];
+              fieldGrade2Column.innerText = r[12];
+              fieldGrade3Column.innerText = r[11];
+              fieldGrade4Column.innerText = r[6];
+              fieldGrade5Column.innerText = r[9].toFixed(1);
+              insideResultsBox.appendChild(tr2);
+  
+            })
+          }
+          searchResultsBox.appendChild(tr);
+        }   
+      } 
+    }
+  
+    //4-7 독서활동 기록
+    function displayReadingRecord(){
+  
+      var sortedReadingData = readingData.sort(function(a, b){
+        var x = a[3];
+        var y = b[3];
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+        return 0;
+      });
+  
+      var searchResultsBox = document.getElementById("readingRecord");
+      var templateBox = document.getElementById("readingTemplate");
+      var template = templateBox.content;
+      
+      if (readingData.length !== 0) {
+        searchResultsBox.innerHTML = "";
+              
+        sortedReadingData.forEach(function(r){
+                
+          var tr = template.cloneNode(true);
+          var yearReadingColumn = tr.querySelector(".yearReading"); 
+          var readingFieldColumn = tr.querySelector(".readingField"); 
+          var readingRecordContentsColumn = tr.querySelector(".readingRecordContents"); 
+  
+          yearReadingColumn.innerText = r[3];
+          readingFieldColumn.innerText = r[5];
+          readingRecordContentsColumn.innerHTML = "(1학기) "+ r[6] + "<br>" + "(2학기) " + r[7];
+          searchResultsBox.appendChild(tr);
+        });
+  
+      } else {
+        searchResultsBox.innerHTML = "";    
+        var tr = template.cloneNode(true);
+        searchResultsBox.appendChild(tr);
+      } 
+    }
+  
+    //4-8 행동특성 기록
+    function displayHrOpinions(){
+  
+      var sortedOpinionData = opinionData.sort(function(a, b){
+        var x = a[4];
+        var y = b[4];
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+        return 0;
+      }).sort(function(a, b){
+        var x = a[2];
+        var y = b[2];
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+        return 0;
+      });
+    
+    //나는... 학기별로 1개씩 써 있는 의견을 1개로 합쳐서 넣고자 한다.
+    //학년이 맞으면 넣어라 하면 되겠군. 학년으로 필터해서 넣으면 되겠군. 
+      var sortedRegistrationData = registrationData.sort(function(a, b){
+        var x = a[1];
+        var y = b[1];
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+        return 0;
+      });
+  
+      var searchResultsBox = document.getElementById("hrOpinionResult");
+      var templateBox = document.getElementById("forHrOpResult");
+      var template = templateBox.content;
+  
+      if (registrationData.length !== 0) {
+        searchResultsBox.innerHTML = "";
+  
+        for(i=0; i<registrationData.length; i++){
+          var activitySchoolYear = sortedRegistrationData[i][1];
+        
+          var thisYearOpinion = sortedOpinionData.filter(function(r){
+            return r[0] === activitySchoolYear;
+          }).map(r => r[3]);                                 
+        
+          var tr = template.cloneNode(true);
+          var hrOpinionYearColumn = tr.querySelector(".hrOpinionYear"); 
+          var hrOpinionColumn = tr.querySelector(".hrOpinion"); 
+  
+          hrOpinionYearColumn.innerText = sortedRegistrationData[i][5];
+          hrOpinionColumn.innerHTML = thisYearOpinion[1] === "" ? thisYearOpinion[0] : thisYearOpinion[0] + "<br>" + thisYearOpinion[1];
+          searchResultsBox.appendChild(tr);
+        }
+      } else {
+        searchResultsBox.innerHTML = "";    
+        var tr = template.cloneNode(true);
+        searchResultsBox.appendChild(tr);
+      } 
+    }
+  
+    //4-5-1 봉사활동 기록
+    function displayVoluntaryWork(){
+  
+      var sortedVoluntaryWorkData = voluntaryWorkData.sort(function(a, b){
+        var x = a[6];
+        var y = b[6];
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+        return 0;
+      });
+  
+      var searchResultsBox = document.getElementById("voluntaryWorkResult");
+      var templateBox = document.getElementById("voluntaryWorkTemplate");
+      var template = templateBox.content;
+      
+      if (voluntaryWorkData.length !== 0) {
+        searchResultsBox.innerHTML = "";
+  
+        for(i=0; i < sortedVoluntaryWorkData.length; ){
+  
+          var tr = template.cloneNode(true);
+          var voluntaryWork1Column = tr.querySelector(".voluntaryWork1"); 
+          var voluntaryWork2Column = tr.querySelector(".voluntaryWork2"); 
+          var voluntaryWork3Column = tr.querySelector(".voluntaryWork3"); 
+          var voluntaryWork4Column = tr.querySelector(".voluntaryWork4"); 
+          var voluntaryWork5Column = tr.querySelector(".voluntaryWork5"); 
+          var voluntaryWork6Column = tr.querySelector(".voluntaryWork6"); 
+  
+          voluntaryWork1Column.innerText = sortedVoluntaryWorkData[i][2];
+          voluntaryWork2Column.innerText = sortedVoluntaryWorkData[i][6];
+          voluntaryWork3Column.innerText = sortedVoluntaryWorkData[i][8];
+          voluntaryWork4Column.innerText = sortedVoluntaryWorkData[i][7];
+          voluntaryWork5Column.innerText = sortedVoluntaryWorkData[i][5];
+       
+          if(i==0) { 
+            voluntaryWork6Column.innerText = sortedVoluntaryWorkData[i][5]; 
+          } else { 
+            voluntaryWork6Column.innerText = Number(sortedVoluntaryWorkData[i][5]) + Number(sortedVoluntaryWorkData[i-1][5])
+          }
+          searchResultsBox.appendChild(tr);
+          i++;
+        };
+      } else {
+       searchResultsBox.innerHTML = "";    
+       var tr = template.cloneNode(true);
+       searchResultsBox.appendChild(tr);
+      } 
+    }
+  
+    function changeProfilePicture(){
+  
+      // console.log(basicData[0])
+      if (basicData[0][21] !== ""){
+        var imgLink = "https://drive.google.com/uc?export=view&id="+ basicData[0][21];
+        document.querySelector(".profilePic").src=imgLink;
+      } else {
+        var imgLink = "https://drive.google.com/uc?export=view&id="+ "1SHSilEqAGP_8AAcAABz0G8_7uHg3y-TT";
+        document.querySelector(".profilePic").src=imgLink;
+      }
+    }
+  
+      function inputEventHandler(e){
+      if(e.target.matches("#studentname")){
+          searchsIDs();
+      }
+      }
+  
+      function changeEventHandler(e){
+        if(e.target.matches("#sID")){
+            // displayRegistrationData();
+        }
+        if(e.target.matches("#schoolterm")){
+          setDate();
+         document.getElementById("studentname").value = ""
+         document.getElementById("sID").innerHTML = "<option> </option>";
+  
+        }
+        if(e.target.matches("#schoolyear")){
+          setDate();
+          document.getElementById("studentname").value = ""
+          document.getElementById("sID").innerHTML = "<option> </option>";
+        }
+        if(e.target.matches("#schoolStage")){
+          document.getElementById("studentname").value = ""
+          document.getElementById("sID").innerHTML = "<option> </option>";
+        }
+      }
+  
+    function loadingStart(){
+      document.getElementById("loading").classList.remove("invisible");   
+    }
+  
+    function loadingEnd(){
+      document.getElementById("loading").classList.add("invisible");   
+    }
+  
+    document.getElementById("app").addEventListener("input", inputEventHandler);
+    document.getElementById("app").addEventListener("change", changeEventHandler);    
+    document.addEventListener("DOMContentLoaded", setInitialBasicData);
+    document.addEventListener("DOMContentLoaded", setRegistrationData);
+  
+  </script>
